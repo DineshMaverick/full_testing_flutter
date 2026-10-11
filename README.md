@@ -127,6 +127,8 @@ To test only **Widget tests** of the project, run:
 
     flutter test test/widget/
 
+The sample app demonstrates dependency injection with Provider: `MyApp` accepts an optional `PersonFormModel` and otherwise creates one. The form has name and age fields with validation; submitting valid values displays the result. Dependency-injection scenarios are in `test/unit/dependency_injection_test.dart`.
+
 To run the Flutter Driver integration test on a connected Android device, run:
 
     flutter drive --target=test_driver/app.dart -d <device-id>
@@ -140,6 +142,14 @@ To run the unit and widget tests here and the device integration test on Browser
     ./scripts/run_browserstack.sh
 
 The script defaults to the `Google Pixel 7-13.0` BrowserStack device; override it by setting `BROWSERSTACK_DEVICE`. It runs unit and widget tests locally, builds and uploads the Android app and integration-test APKs, then waits for the BrowserStack result. The Codespace needs Flutter, the Android SDK/command-line tools, Java 17, `curl`, and `jq`. No local Android emulator is needed. Keep the access key in Codespaces secrets, not in the repository. The remote device run is the integration test; unit and widget test output remains in the Codespace terminal.
+
+### Run the integration test on BrowserStack iOS
+
+The iOS BrowserStack workflow uses XCUITest, not Android Espresso. The Xcode project includes a `RunnerTests` target configured for Flutter's `integration_test` runner. On macOS, set `BROWSERSTACK_USERNAME`, `BROWSERSTACK_ACCESS_KEY`, `IOS_DEVELOPMENT_TEAM` (your Apple Developer team ID), and `BROWSERSTACK_IOS_DEVICE` (the exact iPhone model and OS version from BrowserStack), then run:
+
+    bash scripts/run_browserstack_ios.sh
+
+The script installs the Flutter CocoaPods, builds and signs the app IPA, builds and packages the XCUITest runner ZIP, uploads both artifacts, starts the BrowserStack build, and waits for its result. The Mac needs Flutter, CocoaPods, Xcode, and an Apple Developer account that can provision the app and test runner. If artifacts have already been built, set `BROWSERSTACK_IOS_APP_PATH` and `BROWSERSTACK_IOS_TEST_SUITE_PATH` to reuse them; in that case the upload can also run from Linux. Building/signing requires macOS and Xcode. Keep credentials in Codespaces secrets, not in the repository.
 
 To run **Formatting code** ✔️; **Analyzing code** 🔍; **Unit test code** 🆗; **Widget test** 📲 and **Test coverage** ☔️. everything together ⏲️:
 

@@ -66,9 +66,9 @@ app_url="$(jq -er '.app_url' <<<"$app_response")"
 printf 'Uploading Flutter test APK to BrowserStack...\n'
 test_response="$(curl --fail-with-body --silent --show-error \
   --user "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
-  --request POST "$api/espresso/upload" \
+  --request POST "$api/espresso/v2/test-suite" \
   --form "file=@$test_apk")"
-test_url="$(jq -er '.test_url' <<<"$test_response")"
+test_url="$(jq -er '.test_suite_url' <<<"$test_response")"
 
 printf 'Starting BrowserStack run on %s...\n' "$BROWSERSTACK_DEVICE"
 build_response="$(jq -n \
