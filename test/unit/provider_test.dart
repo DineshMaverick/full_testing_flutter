@@ -8,45 +8,21 @@ import 'package:full_testing_flutter/counter.dart';
 void main() async {
   group('[Provider]', () {
     testWidgets('Update when the value changes', (tester) async {
-      final _providerKey = GlobalKey();
-      BuildContext context;
+      await tester.pumpWidget(const MyApp());
+      final childContext = tester.element(find.byKey(const Key('counter')));
 
-      await tester.pumpWidget(ChangeNotifierProvider<Counter>(
-        key: _providerKey,
-        create: (c) {
-          context = c;
-          return Counter();
-        },
-        child: MyApp(),
-      ));
+      expect(Provider.of<Counter>(childContext, listen: false).value, 0);
 
-      // Check the context test...
-      expect(context, equals(_providerKey.currentContext));
+      Provider.of<Counter>(childContext, listen: false).increment();
+      await tester.pump();
 
-      /// Only the descendants of the `ChangeNotifierProvider<T>`
-      /// can call `Provider.of<T>`, so find his context...
-      final BuildContext childContext = tester.element(find.byType(MyApp));
+      expect(Provider.of<Counter>(childContext, listen: false).value, 1);
 
-      // Check the initial value provider 0...
-      expect(Provider.of<Counter>(childContext).value, 0);
-
-      // Increment value...
-      Provider.of<Counter>(childContext).increment();
-
-      // Delay the pump...
-      await Future.microtask(tester.pump);
-
-      // Check incremented value...
-      expect(Provider.of<Counter>(childContext).value, 1);
-
-      // Decrement value...
       Provider.of<Counter>(childContext, listen: false).decrement();
-
-      // Delay the pump...
-      await Future.microtask(tester.pump);
+      await tester.pump();
 
       // Check decremented value...
-      expect(Provider.of<Counter>(childContext).value, 0);
+      expect(Provider.of<Counter>(childContext, listen: false).value, 0);
     });
   });
 }

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:full_testing_flutter/counter.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -14,7 +16,7 @@ class MyApp extends StatelessWidget {
     // Provider, but then we would have to listen to Counter ourselves.
     //
     // Read Provider's docs to learn about all the available providers.
-    return ChangeNotifierProvider(
+    return ChangeNotifierProvider<Counter>(
       // Initialize the model in the builder. That way, Provider
       // can own Counter's lifecycle, making sure to call `dispose`
       // when not needed anymore.
@@ -33,7 +35,7 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatelessWidget {
   final String title;
 
-  MyHomePage({this.title});
+  const MyHomePage({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +58,7 @@ class MyHomePage extends StatelessWidget {
               builder: (context, counter, child) => Text(
                 '${counter.value}',
                 key: Key('counter'),
-                style: Theme.of(context).textTheme.display1,
+                style: Theme.of(context).textTheme.displayLarge,
               ),
             ),
           ],

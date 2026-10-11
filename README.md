@@ -1,6 +1,6 @@
 # Flutter App's simplest automated full test
 
-[![Codemagic build status](https://api.codemagic.io/apps/5ddbe31c011bc93c37050c9f/5ddbe31c011bc93c37050c9e/status_badge.svg)](https://codemagic.io/apps/5ddbe31c011bc93c37050c9f/5ddbe31c011bc93c37050c9e/latest_build) [![Travis build status](https://img.shields.io/travis/chinnonsantos/full_testing_flutter/master?logo=travis)](https://travis-ci.org/chinnonsantos/full_testing_flutter) [![Codecov coverage](https://codecov.io/gh/chinnonsantos/full_testing_flutter/branch/master/graph/badge.svg)](https://codecov.io/gh/chinnonsantos/full_testing_flutter) [![Flutter version](https://img.shields.io/badge/flutter-v1.11.0-blue?logo=flutter)](https://flutter.dev/docs/get-started/install) [![GitHub license](https://img.shields.io/github/license/chinnonsantos/full_testing_flutter)](https://choosealicense.com/licenses/mit/) [![Twitter follow](https://img.shields.io/twitter/follow/chinnonsantos?label=follow&style=flat&logo=twitter)](https://twitter.com/intent/follow?screen_name=chinnonsantos) [![Slack channel](https://img.shields.io/badge/slack-%23geral-blueviolet?logo=slack)](https://join.slack.com/t/chinnonsantos-nudemo/signup) [![Open source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![Codemagic build status](https://api.codemagic.io/apps/5ddbe31c011bc93c37050c9f/5ddbe31c011bc93c37050c9e/status_badge.svg)](https://codemagic.io/apps/5ddbe31c011bc93c37050c9f/5ddbe31c011bc93c37050c9e/latest_build) [![Travis build status](https://img.shields.io/travis/chinnonsantos/full_testing_flutter/master?logo=travis)](https://travis-ci.org/chinnonsantos/full_testing_flutter) [![Codecov coverage](https://codecov.io/gh/chinnonsantos/full_testing_flutter/branch/master/graph/badge.svg)](https://codecov.io/gh/chinnonsantos/full_testing_flutter) [![Flutter version](https://img.shields.io/badge/flutter-3.24%2B-blue?logo=flutter)](https://flutter.dev/docs/get-started/install) [![GitHub license](https://img.shields.io/github/license/chinnonsantos/full_testing_flutter)](https://choosealicense.com/licenses/mit/) [![Twitter follow](https://img.shields.io/twitter/follow/chinnonsantos?label=follow&style=flat&logo=twitter)](https://twitter.com/intent/follow?screen_name=chinnonsantos) [![Slack channel](https://img.shields.io/badge/slack-%23geral-blueviolet?logo=slack)](https://join.slack.com/t/chinnonsantos-nudemo/signup) [![Open source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
 This project shows an example of the main forms of automated testing in Flutter mobile App, including integration into a [CI/CD platform][], as follows:
 
@@ -46,29 +46,44 @@ See more details about Codemagic in '[Getting Started with Codemagic]'.
 
 ## Prerequisites
 
-You will need [Flutter][] framework v1.11.0 or above installed ([Channel beta][], on Linux, locale en_US.UTF-8).
+You will need Flutter 3.24 or later, the Android SDK, and Java 17. Android Studio can install the Android SDK and create an emulator. Verify the setup with:
+
+    flutter doctor
+    flutter doctor --android-licenses
+
+In Android Studio, start an Android emulator before running the app. From the project root, fetch dependencies and check the available device IDs:
+
+    flutter pub get
+    flutter devices
+
+Run the app on the selected emulator (replace `<emulator-id>` with the ID shown by `flutter devices`):
+
+    flutter run -d <emulator-id>
+
+If only one emulator/device is running, `flutter run` selects it automatically.
 
 > The Dart SDK **is not required** because Flutter has _[Dart language][]_ support as an integrated tool in the framework.
 
 [Flutter]: https://flutter.dev/
-[Channel beta]: https://github.com/flutter/flutter/wiki/Flutter-build-release-channels#beta
 [Dart language]: https://dart.dev/
 
 **Libraries:**
 
-- [test][] 1.6.3
-- [provider][] 3.1.0+1
-- [pedantic][] 1.8.0+1 (dev)
+- [provider][] 6.x
+- [integration_test][] (Flutter SDK)
+- [flutter_driver][] (Flutter SDK, legacy integration tests)
+- [flutter_lints][] 5.x (dev)
 
-[test]: https://pub.dev/packages/test
 [provider]: https://pub.dev/packages/provider
-[pedantic]: https://pub.dev/packages/pedantic
+[integration_test]: https://pub.dev/packages/integration_test
+[flutter_driver]: https://api.flutter.dev/flutter/flutter_driver/flutter_driver-library.html
+[flutter_lints]: https://pub.dev/packages/flutter_lints
 
 ## Running tests
 
 To automatically [formatting][] code, run:
 
-    flutter format lib test test_driver
+    dart format lib test test_driver integration_test
 
 [formatting]: https://flutter.dev/docs/development/tools/formatting
 
@@ -112,14 +127,19 @@ To test only **Widget tests** of the project, run:
 
     flutter test test/widget/
 
-To test only **Integration** (or assertion) of the project, run:
+To run the Flutter Driver integration test on a connected Android device, run:
 
-    flutter drive --target=test_driver/app.dart
+    flutter drive --target=test_driver/app.dart -d <device-id>
 
-_-->> First, be sure to launch an Android Emulator, iOS Simulator, or connect your computer to a real iOS / Android device. **Integration testing needs to be executed on a real system (simulator or device)!**_
+The BrowserStack workflow uses the modern `integration_test` test below:
 
-> "Unlike unit and widget tests, integration test suites do not run in the same process as the app being tested. Therefore, create two files that reside in the same directory. By convention, the directory is named **`test_driver`**."
-> \- An introduction to integration testing
+    flutter test integration_test/app_test.dart -d <device-id>
+
+To run the unit and widget tests here and the device integration test on BrowserStack, add `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` as Codespaces secrets, then run:
+
+    ./scripts/run_browserstack.sh
+
+The script defaults to the `Google Pixel 7-13.0` BrowserStack device; override it by setting `BROWSERSTACK_DEVICE`. It runs unit and widget tests locally, builds and uploads the Android app and integration-test APKs, then waits for the BrowserStack result. The Codespace needs Flutter, the Android SDK/command-line tools, Java 17, `curl`, and `jq`. No local Android emulator is needed. Keep the access key in Codespaces secrets, not in the repository. The remote device run is the integration test; unit and widget test output remains in the Codespace terminal.
 
 To run **Formatting code** ✔️; **Analyzing code** 🔍; **Unit test code** 🆗; **Widget test** 📲 and **Test coverage** ☔️. everything together ⏲️:
 
@@ -172,9 +192,9 @@ When you can run local drive testing with Sylph on AWS Device Farm, see [this ar
 
 ## Running the APP
 
-To start the mobile App example, run:
+To start the mobile app on a running Android emulator from the project root, run:
 
-    flutter run
+    flutter run -d <emulator-id>
 
 ## License
 
